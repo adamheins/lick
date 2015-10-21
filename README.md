@@ -4,7 +4,7 @@ A simple tool for pulling a license into your software project.
 Lick is written in Python and is compatible with both Python 2 and Python 3.
 
 ## Installation
-Get the `lick` executable and put it on your path. You can run
+Get the `lick` executable and put it on your `$PATH`. You can run
 ```bash
 (curl https://raw.githubusercontent.com/adamheins/lick/master/lick)> lick
 ```
