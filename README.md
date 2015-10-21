@@ -3,7 +3,9 @@ A simple tool for pulling a license into your software project.
 
 ## Installation
 Get the `lick` executable and put it on your path. You can run
-`(curl https://raw.githubusercontent.com/adamheins/lick/master/lick)> lick`
+```bash
+(curl https://raw.githubusercontent.com/adamheins/lick/master/lick)> lick
+```
 in your prompt to get a copy of `lick`. Lick is written in Python compatible
 with both Python 2 and Python 3.
 
