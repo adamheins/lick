@@ -22,7 +22,7 @@ lick --list
 ```
 
 ## Contributing
-Pull requests are welcome! Especially PRs adding new LICENSES.
+Pull requests are welcome! Especially PRs adding new licenses.
 
 ## License
 MIT license. See the LICENSE file.
