@@ -4,7 +4,7 @@ import argparse
 import requests
 from datetime import date
 
-LICENSE_ROOT_URL = 'https://raw.githubusercontent.com/adamheins/licenses/master'
+LICENSE_ROOT_URL = 'https://raw.githubusercontent.com/adamheins/lick/master/licenses'
 
 def main():
     parser = argparse.ArgumentParser()
