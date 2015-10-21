@@ -9,7 +9,10 @@ Get the `lick` executable and put it on your path. You can run
 (curl https://raw.githubusercontent.com/adamheins/lick/master/lick)> lick
 ```
 in your terminal to get a copy of `lick`. Install Python dependencies by
-running `pip install -r requirements.txt`.
+running
+```bash
+pip install -r requirements.txt
+```
 
 ## Usage
 Specify a license type for lick to pull in. You must also provide the `--name`
@@ -24,7 +27,7 @@ lick --list
 ```
 
 ## Contributing
-Pull requests are welcome! Especially PRs adding new licenses.
+Pull requests are welcome! Especially ones adding new licenses.
 
 ## License
 MIT license. See the LICENSE file.
