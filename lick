@@ -7,6 +7,8 @@ import json
 import os
 import re
 import requests
+
+from colorama import Fore, Style
 from datetime import date
 
 LICENSES = ['APACHE', 'MIT', 'BSD-2-CLAUSE', 'BSD-3-CLAUSE']
@@ -20,13 +22,17 @@ def load_properties(req_props):
     # If that does not exist, attempt to load the default config at
     # ~/.lick.json.
     fp = os.environ.get('LICK_PROPERTIES_FILE_PATH')
+    print(Fore.RED, end='')
     if fp is not None:
         try:
             with open(fp) as f:
                 properties.update(json.load(f))
+        except IOError:
+            print('  warning: file pointed to by $LICK_PROPERTIES_FILE_PATH'
+                  ' could not be opened')
         except ValueError:
-            print("lick properties file at '{}' contains malformed JSON"
-                  .format(fp))
+            print("  warning: lick properties file at '{}' contains malformed"
+                  " JSON".format(fp))
     else:
         default_file_path = os.path.expanduser('~/.lick.json')
         try:
@@ -35,16 +41,22 @@ def load_properties(req_props):
         except IOError:
             pass
         except ValueError:
-            print("lick properties file at '{}' contains malformed JSON"
-                  .format(default_file_path))
+            print("  warning: lick properties file at '{}' contains malformed"
+                  " JSON".format(default_file_path))
+    print(Fore.RESET, end='')
+
+    req_props = set(req_props) - set(properties.keys())
 
     # Use the current error if is hasn't already been defined.
-    if 'year' in req_props and 'year' not in properties.keys():
+    if 'year' in req_props:
         properties['year'] = str(date.today().year)
+        req_props.remove('year')
 
     # Get the rest of the required properties from terminal input.
-    for prop in (set(req_props) - set(properties.keys())):
-        properties[prop] = raw_input('{}: '.format(prop))
+    if len(req_props) > 0:
+        print('Enter properties:')
+    for prop in req_props:
+        properties[prop] = raw_input('  {}: '.format(prop))
     return properties
 
 def parse_required_properties(text):
@@ -54,37 +66,42 @@ def parse_required_properties(text):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('type', nargs='?', help='Type of license to use.')
+    parser.add_argument('-o', '--output', help='File to which to output the'
+                        ' license.')
     parser.add_argument('-l', '--list', help='List all available licenses.',
                         action='store_true')
     args = parser.parse_args()
 
-    if args.list:
-        for li in LICENSES:
-            print(li)
-        return
-
+    # Check if the license type is supported.
     license = args.type.upper()
     if license not in LICENSES:
-        print('Unsupported license: {}.'.format(args.type))
-        return
+        print(Fore.RED, end='')
+        print("error: unsupported license '{}'".format(args.type))
+        print(Fore.RESET, end='')
+        exit(1)
 
+    # GET request for the license text.
     print('Licking {}...'.format(license))
     url = '/'.join([LICENSE_ROOT_URL, license])
     req = requests.get(url)
     if req.status_code != 200:
-        print('Error: {} {}'.format(req.status_code, req.text))
+        print(Fore.RED, end='')
+        print('  error: {} {}'.format(req.status_code, req.text))
+        print(Fore.RESET, end='')
         return
 
+    # Load required fields.
     text = req.text
     req_props = parse_required_properties(text)
     properties = load_properties(req_props)
-    print(properties)
-
-    for prop in properties:
+    for prop in properties: # TODO rename to fields
         text = text.replace('<' + prop + '>', properties[prop])
 
-    with open('LICENSE', 'w') as license:
+    # Write the license file.
+    license_file_path = args.output if args.output else 'LICENSE'
+    with open(license_file_path, 'w') as license:
         license.write(text)
+    print("License '{}' written to '{}'".format(args.type, license_file_path))
 
 if __name__ == '__main__':
     main()
