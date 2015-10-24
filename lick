@@ -72,11 +72,17 @@ def main():
                         action='store_true')
     args = parser.parse_args()
 
+    # If the list option was passed, just list available license types and exit.
+    if args.list:
+        for license in LICENSES:
+            print(license)
+        exit(0)
+
     # Check if the license type is supported.
     license = args.type.upper()
     if license not in LICENSES:
         print(Fore.RED, end='')
-        print("error: unsupported license '{}'".format(args.type))
+        print("error: unsupported license type '{}'".format(args.type))
         print(Fore.RESET, end='')
         exit(1)
 
@@ -97,8 +103,16 @@ def main():
     for prop in properties: # TODO rename to fields
         text = text.replace('<' + prop + '>', properties[prop])
 
-    # Write the license file.
     license_file_path = args.output if args.output else 'LICENSE'
+
+    # Check if overwriting existing file is acceptable.
+    if os.path.exists(license_file_path):
+        overwrite = raw_input("Overwrite '{}'? [Y/n] ".format(license_file_path))
+    if len(overwrite) > 0 and overwrite[0].upper() == 'N':
+        print('Aborted')
+        exit(1)
+
+    # Write the license file.
     with open(license_file_path, 'w') as license:
         license.write(text)
     print("License '{}' written to '{}'".format(args.type, license_file_path))
