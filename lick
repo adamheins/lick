@@ -13,54 +13,55 @@ from datetime import date
 
 LICENSES = ['APACHE', 'MIT', 'BSD-2-CLAUSE', 'BSD-3-CLAUSE']
 LICENSE_ROOT_URL = 'https://raw.githubusercontent.com/adamheins/lick/master/licenses'
+DEFAULT_LICENSE_FILE = 'LICENSE'
+DEFAULT_LICK_FIELD_FILE = '~/.lick.json'
 
-def load_properties(req_props):
-    """ Load the values of the required properties to fill out the license. """
-    properties = {}
+def load_field_values(required_fields):
+    """ Load the values of the fields required to fill out the license. """
+    fields = {}
 
-    # First, check for a file pointed to $LICK_PROPERTIES_FILE_PATH.
-    # If that does not exist, attempt to load the default config at
-    # ~/.lick.json.
-    fp = os.environ.get('LICK_PROPERTIES_FILE_PATH')
+    # First, check for a file pointed to $LICK_FIELD_FILE_PATH. If that does
+    # not exist, attempt to load the default config at ~/.lick.json.
+    fp = os.environ.get('LICK_FIELD_FILE_PATH')
     print(Fore.RED, end='')
     if fp is not None:
         try:
             with open(fp) as f:
-                properties.update(json.load(f))
+                fields.update(json.load(f))
         except IOError:
-            print('  warning: file pointed to by $LICK_PROPERTIES_FILE_PATH'
+            print('  warning: file pointed to by $LICK_FIELD_FILE_PATH'
                   ' could not be opened')
         except ValueError:
-            print("  warning: lick properties file at '{}' contains malformed"
+            print("  warning: lick fields file at '{}' contains malformed"
                   " JSON".format(fp))
     else:
-        default_file_path = os.path.expanduser('~/.lick.json')
+        default_file_path = os.path.expanduser(DEFAULT_LICK_FIELD_FILE)
         try:
             with open(default_file_path) as f:
-                properties.update(json.load(f))
+                fields.update(json.load(f))
         except IOError:
             pass
         except ValueError:
-            print("  warning: lick properties file at '{}' contains malformed"
+            print("  warning: lick fields file at '{}' contains malformed"
                   " JSON".format(default_file_path))
     print(Fore.RESET, end='')
 
-    req_props = set(req_props) - set(properties.keys())
+    required_fields = set(required_fields) - set(fields.keys())
 
-    # Use the current error if is hasn't already been defined.
-    if 'year' in req_props:
-        properties['year'] = str(date.today().year)
-        req_props.remove('year')
+    # Use the current year if is hasn't already been defined.
+    if 'year' in required_fields:
+        fields['year'] = str(date.today().year)
+        required_fields.remove('year')
 
-    # Get the rest of the required properties from terminal input.
-    if len(req_props) > 0:
-        print('Enter properties:')
-    for prop in req_props:
-        properties[prop] = raw_input('  {}: '.format(prop))
-    return properties
+    # Get the rest of the required fields from terminal input.
+    if len(required_fields) > 0:
+        print('Enter fields:')
+        for field in required_fields:
+            fields[field] = raw_input('  {}: '.format(field))
+    return fields
 
-def parse_required_properties(text):
-    """ Parse which properties are required to fill out the license. """
+def parse_required_fields(text):
+    """ Parse fields required to fill out the license. """
     return set(re.findall(r'<(\S+)>', text))
 
 def main():
@@ -94,14 +95,14 @@ def main():
         print(Fore.RED, end='')
         print('  error: {} {}'.format(req.status_code, req.text))
         print(Fore.RESET, end='')
-        return
+        exit(1)
 
     # Load required fields.
     text = req.text
-    req_props = parse_required_properties(text)
-    properties = load_properties(req_props)
-    for prop in properties: # TODO rename to fields
-        text = text.replace('<' + prop + '>', properties[prop])
+    required_fields = parse_required_fields(text)
+    fields = load_field_values(required_fields)
+    for field in fields:
+        text = text.replace('<' + field + '>', fields[field])
 
     license_file_path = args.output if args.output else 'LICENSE'
 
@@ -119,3 +120,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    exit(0)
