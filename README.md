@@ -44,9 +44,8 @@ lick --list
 ## Contributing
 Pull requests are welcome! Especially ones adding new licenses. Fields that
 need to be filled out in the license should be placed between angled brackets
-(`< >`). The field names should not contain whitespace. The name of the
-license's file name must all be added to `LICENSES` list in the `lick` source
-file.
+(`< >`). The field names should not contain whitespace. The license's file name
+must be added to the `LICENSES` list in the `lick` source file.
 
 ## License
 MIT license. See the LICENSE file.
