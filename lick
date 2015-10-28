@@ -118,9 +118,9 @@ def main():
     # Check if overwriting existing file is acceptable.
     if os.path.exists(license_file_path):
         overwrite = prompt("Overwrite '{}'? [Y/n] ".format(license_file_path))
-    if len(overwrite) > 0 and overwrite[0].upper() == 'N':
-        print('Aborted')
-        exit(1)
+        if len(overwrite) > 0 and overwrite[0].upper() == 'N':
+            print('Aborted')
+            exit(1)
 
     # Write the license file.
     with open(license_file_path, 'w') as license:
